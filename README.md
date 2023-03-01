@@ -4,7 +4,6 @@
 ## Update log
 - 2023-3-1: Add the `-b` flag in downloadCmd to advocate baiduNetDisk file.
 ![baiduFlag](https://typora-photos.oss-cn-shenzhen.aliyuncs.com/remake/20230301165332.png)
-- 
 
 ## To Do
 - [x] The `-b` flag in the downloadCmd to advocate baiduNetDisk file.
