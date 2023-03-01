@@ -9,19 +9,19 @@ import (
 )
 
 var (
-	SaveFolder = "Downloads/luFD"
+	SaveFolder = "Downloads/luFDTemp"
 )
 
 type State struct {
-	URL            string
-	DownloadRanges []DownloadRange
+	URL            string          // URL is the url of the file to download
+	DownloadRanges []DownloadRange // DownloadRanges is a list of DownloadRange, used to save the state of downloading
 }
 
 type DownloadRange struct {
-	URL       string
-	Path      string
-	RangeFrom int64
-	RangeTo   int64
+	URL       string // URL is the url of the file to download
+	Path      string // Path is the path of the download file to save
+	RangeFrom int64  // RangeFrom is the start of the range to download
+	RangeTo   int64  // RangeTo is the end of the range to download
 }
 
 func (state *State) Save() error {

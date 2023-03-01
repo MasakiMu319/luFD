@@ -12,8 +12,9 @@ import (
 	"syscall"
 )
 
-func Do(url string, state *tool.State, conc int) error {
+func Do(url string, state *tool.State, conc int, baidu bool) error {
 	signalChan := make(chan os.Signal, 1)
+	// signal.Notify will sign up for the notification of the specified signals
 	signal.Notify(signalChan,
 		syscall.SIGHUP,
 		syscall.SIGINT,
@@ -21,18 +22,25 @@ func Do(url string, state *tool.State, conc int) error {
 		syscall.SIGQUIT)
 	files := []string{}
 	parts := []tool.DownloadRange{}
+	// isInterrupted is used to indicate whether the download is interrupted,
+	// if it is interrupted, the download will be resumed, and saved to the state file
 	isInterrupted := false
+	// doneChan is used to indicate that the download is complete
 	doneChan := make(chan bool, conc)
+	// fileChan is used to receive the file name of the downloaded file
+	// TODO: later back to check
 	fileChan := make(chan string, conc)
 	errorChan := make(chan error, 1)
 	stateChan := make(chan tool.DownloadRange, 1)
+	// TODO: why is it necessary have a interruptChan? SignalChan is enough?
 	interruptChan := make(chan bool, conc)
 
 	var dl *downloader.HTTPDownloader
 	var err error
 
+	// for the first time download, state is always nil
 	if state == nil {
-		dl, err = downloader.NewHTTPDownloader(url, conc)
+		dl, err = downloader.NewHTTPDownloader(url, conc, baidu)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -78,7 +86,11 @@ func Do(url string, state *tool.State, conc int) error {
 					return nil
 				}
 			} else {
-				err = merger.MergeFiles(files, filepath.Base(url))
+				baseUrl := filepath.Base(url)
+				if len(baseUrl) > 15 {
+					baseUrl = baseUrl[len(baseUrl)-15:]
+				}
+				err = merger.MergeFiles(files, baseUrl)
 				if err != nil {
 					return errors.WithStack(err)
 				}
